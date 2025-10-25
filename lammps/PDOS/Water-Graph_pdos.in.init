@@ -1,7 +1,5 @@
 variable run  string water-graph_pdos
-variable steps equal 4
 variable temp equal 298.
-variable temp2 equal 360.
 echo            log
 log             ${run}.log
 
