@@ -163,30 +163,31 @@ The following outputs are used in the evaluation of TBR:
 
 ## Contact Angle (CA)
 
-This section describes the workflow to compute the water–graphene contact angle via LAMMPS simulations and MATLAB post-processing.
+This section describes the workflow to compute the water–graphene contact angle.
+Two procedures are available: trajectory-based contact angle caluculation (LAMMPS + MATLAB post-processing) and through free energy perturbation *FEP* (LAMMPS + python post-processing).
 
 ### Overview
 
 A series of three replica simulations (`0-replica`, `1-replica`, `2-replica`) are performed to improve statistical reliability. Each replica starts from the final structure of the previous run and provides the trajectory files.
 
 ### Directory Structure
-
 ```bash
-lammps/CA/
-        ├── relaxed_graph/              # Pre-equilibrated graphene structures at various oxidation degrees
-        │
-        ├── 0-replica/                  # Base simulation folder
-        │   ├── TERSOFF_forcefield.ff       # Forcefield
-        │   ├── Wet.in*                     # LAMMPS input files
-        │   └── water_box.data              # Water box to merge with equilibrated graphene structure
-        │
-        ├── 1-replica/                  # Simulation folder
-        │   ├── TERSOFF_forcefield.ff       # Forcefield
-        │   └── Wet.in*                     # LAMMPS input files
-        │
-        └── 2-replica/                  # Simulation folder
-            ├── TERSOFF_forcefield.ff       # Forcefield
-            └── Wet.in*                     # LAMMPS input files
+lammps/CA/       
+        ├── fep                               # FEP-based CA calculation
+        │   ├── TERSOFF_forcefield.ff             # Forcefield
+        │   └── Wet.in*                           # LAMMPS input files
+        ├── geometric                         # Trajectory-based CA calculation
+        │   ├── 0-replica                         # Base simulation directory
+        │   │   ├── TERSOFF_forcefield.ff
+        │   │   ├── water_box.data
+        │   │   └── Wet.in*                       
+        │   ├── 1-replica                         # Simulation folder
+        │   │   ├── TERSOFF_forcefield.ff             # Forcefield
+        │   │   └── Wet.in*                           # LAMMPS input files
+        │   └── 2-replica                         # Simulation folder
+        │       ├── TERSOFF_forcefield.ff             # Forcefield
+        │       └── Wet.in*                           # LAMMPS input files
+        └── relaxed_graph                     # Pre-equilibrated graphene structures at various oxidation degrees
 ```
 ### Prerequisites 
 <a href="https://www.lammps.org" target="_blank">
