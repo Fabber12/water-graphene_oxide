@@ -168,7 +168,9 @@ Two procedures are available: trajectory-based contact angle caluculation (LAMMP
 
 ### Overview
 
-A series of three replica simulations (`0-replica`, `1-replica`, `2-replica`) are performed to improve statistical reliability. Each replica starts from the final structure of the previous run and provides the trajectory files.
+The trajectory-based approach is contained in the `geometric` directory. It includes three replica simulations (0-replica, 1-replica, 2-replica) performed to improve statistical reliability. Each replica starts from the final structure of the previous one and produces the corresponding trajectory files.
+
+The free energy perturbation approach is contained in the `fep` directory.
 
 ### Directory Structure
 ```bash
@@ -176,17 +178,21 @@ lammps/CA/
         ├── fep                               # FEP-based CA calculation
         │   ├── TERSOFF_forcefield.ff             # Forcefield
         │   └── Wet.in*                           # LAMMPS input files
+        │
         ├── geometric                         # Trajectory-based CA calculation
         │   ├── 0-replica                         # Base simulation directory
-        │   │   ├── TERSOFF_forcefield.ff
-        │   │   ├── water_box.data
-        │   │   └── Wet.in*                       
-        │   ├── 1-replica                         # Simulation folder
+        │   │   ├── TERSOFF_forcefield.ff         # Forcefield
+        │   │   ├── water_box.data                # Water box to merge with equilibrated graphene structure
+        │   │   └── Wet.in*                       # LAMMPS input files
+        │   │
+        │   ├── 1-replica                         # Simulation folder
         │   │   ├── TERSOFF_forcefield.ff             # Forcefield
         │   │   └── Wet.in*                           # LAMMPS input files
+        │   │
         │   └── 2-replica                         # Simulation folder
         │       ├── TERSOFF_forcefield.ff             # Forcefield
         │       └── Wet.in*                           # LAMMPS input files
+        │
         └── relaxed_graph                     # Pre-equilibrated graphene structures at various oxidation degrees
 ```
 ### Prerequisites 
