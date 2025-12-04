@@ -1,0 +1,85 @@
+compute temp_water water temp
+compute temp_graph graph temp
+
+thermo          1000
+thermo_style custom step etotal evdwl ecoul elong ebond eangle ke pe temp c_temp_water c_temp_graph &
+press vol density cpu &
+thermo_modify flush yes
+
+timestep        1.
+
+# Short safety run for the new soft pair_style 
+fix            2 all nph aniso 1 1 1000
+fix            3 graph langevin ${temp} ${temp} 100 237498
+fix            4 water langevin ${temp} ${temp} 100 537199
+fix_modify     3 temp temp_graph
+fix_modify     4 temp temp_water
+
+run    1000
+
+unfix 2
+unfix 3
+unfix 4
+
+print "- END STEP 1 -------------------------------------"
+
+reset_timestep 0
+print "- START FEP ---------------------------------------"
+
+# Compute
+compute         temp_wOH wat_OH temp
+compute         temp_OH OH temp
+compute         press_wOH all pressure temp_wOH
+compute         press_OH all pressure temp_OH
+compute 	e_groups water group/group graph
+
+# Output
+thermo          1000
+thermo_style custom step etotal evdwl ecoul elong ebond eangle ke pe temp &
+press c_e_groups spcpu cpuremain
+thermo_modify flush yes
+
+# Variable
+variable        NFEP equal 10000
+variable        NRUN equal 500000
+variable        pot_en equal pe
+
+# Trajectory
+dump 1 all custom 10000 ${run}.dump id type element x y z mol
+dump_modify 1 element O H C C O H
+
+# 1. Shrink the cell to the target density.
+timestep        1.
+
+fix             mom all momentum 100 linear 1 1 1
+fix             freeze graph_C setforce 0.0 0.0 0.0  #freeze graphene (only carbon atoms)
+fix             1 wat_OH npt temp ${temp} ${temp} 100. z 1. 1. 1000
+fix_modify      1 temp temp_wOH
+
+
+variable temp    equal ${temp}
+variable dlambda equal 0.02
+variable dlambda_ramp equal 0.02
+variable lambda equal ${dlambda_ramp}+${dlambda_ramp}*floor(step/${NFEP})
+
+
+fix ADAPTfep all adapt/fep ${NFEP} &
+     pair lj/class2/coul/long/soft lambda 1 3 v_lambda &
+     pair lj/class2/coul/long/soft lambda 1 4 v_lambda &
+     pair lj/class2/coul/long/soft lambda 1 5 v_lambda &
+     pair lj/class2/coul/long/soft lambda 1 6 v_lambda &
+     pair lj/class2/coul/long/soft lambda 2 3 v_lambda &
+     pair lj/class2/coul/long/soft lambda 2 4 v_lambda &
+     pair lj/class2/coul/long/soft lambda 2 5 v_lambda &
+     pair lj/class2/coul/long/soft lambda 2 6 v_lambda &     
+     after yes
+
+# Zwanzig estimator over each window
+compute FEP all fep ${temp} &
+    pair lj/class2/coul/long/soft lambda 1*2 3*6 v_dlambda volume yes
+
+# Average the FEP outputs
+fix FAVG all ave/time 10 500 ${NFEP} v_lambda v_pot_en c_FEP[1] c_FEP[2] c_FEP[3] file fep_out.out
+fix check all ave/time 50 1 50 v_lambda v_pot_en c_FEP[1] c_FEP[2] c_FEP[3] file convergence.txt
+
+run ${NRUN}
