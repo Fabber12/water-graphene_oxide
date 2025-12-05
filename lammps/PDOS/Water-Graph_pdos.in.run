@@ -1,44 +1,128 @@
-thermo          1000
-thermo_style custom step etotal evdwl ecoul elong ebond eangle ke pe temp &
-press vol density cpu
-thermo_modify flush yes
-
-dump 1 all custom 25000 ${run}.dump id type element x y z xu yu zu vx vy vz mol
+# Save trajectory
+dump 1 all custom 25000 ${run}.dump id type element x y z xu yu zu vx vy vz
 dump_modify 1 element O H C C O H
 
 timestep        1.
 
-fix 		mom graph momentum 100 linear 1 1 1
+velocity        all create 300 391624 dist gaussian
+
+fix             mom all momentum 100 linear 1 1 1
 fix             1 all nve
 
- variable        i loop 100
- label           ensembleloop
- #store initial velocity for each instance of vacf calculation
- fix             v0save_water water store/state 10000 vx vy vz #save velocities every 10000 steps
- variable        v0v0_water atom f_v0save_water[1]*f_v0save_water[1]+f_v0save_water[2]*f_v0save_water[2]+f_v0save_water[3]*f_v0save_water[3]
- fix             v0save_graph graph store/state 10000 vx vy vz #save velocities every 10000 steps
- variable        v0v0_graph atom f_v0save_graph[1]*f_v0save_graph[1]+f_v0save_graph[2]*f_v0save_graph[2]+f_v0save_graph[3]*f_v0save_graph[3]
- compute         v0v0ave_water water reduce ave v_v0v0_water
- compute         v0v0ave_graph graph reduce ave v_v0v0_graph
+region          slab_5   block INF INF INF INF -5  5   side in
+region          slab_7   block INF INF INF INF -7  7   side in
+region          slab_9   block INF INF INF INF -9  9   side in
+region          slab_12  block INF INF INF INF -12 12  side in
+region          slab_15  block INF INF INF INF -15 15  side in
 
- compute 1 water   vacf
- compute 2 graph vacf 
+# Slab selections
+variable        w_5   atom grmask(water,slab_5)
+variable        g_5   atom grmask(graph,slab_5)
 
- variable        normvelcorr_water equal c_1[4]/c_v0v0ave_water
- variable        normvelcorr_graph equal c_2[4]/c_v0v0ave_graph
+variable        w_7   atom grmask(water,slab_7)
+variable        g_7   atom grmask(graph,slab_7)
 
- fix vacf_water   water   ave/time 1 1 1 v_normvelcorr_water file vacf_water.$i
- fix vacf_graph graph ave/time 1 1 1 v_normvelcorr_graph file vacf_graph.$i
- thermo_style custom step etotal evdwl ecoul elong ebond eangle ke pe temp  &
- press vol density v_normvelcorr_water v_normvelcorr_graph c_v0v0ave_water c_v0v0ave_graph cpu
- run             10000
- 
- uncompute         v0v0ave_water
- uncompute         v0v0ave_graph
- uncompute 1
- uncompute 2
+variable        w_9   atom grmask(water,slab_9)
+variable        g_9   atom grmask(graph,slab_9)
 
- next i
- jump SELF ensembleloop
+variable        w_12  atom grmask(water,slab_12)
+variable        g_12  atom grmask(graph,slab_12)
+
+variable        w_15  atom grmask(water,slab_15)
+variable        g_15  atom grmask(graph,slab_15)
 
 
+
+group           water_5   variable w_5
+group           graph_5   variable g_5
+
+group           water_7   variable w_7
+group           graph_7   variable g_7
+
+group           water_9   variable w_9
+group           graph_9   variable g_9
+
+group           water_12  variable w_12
+group           graph_12  variable g_12
+
+group           water_15  variable w_15
+group           graph_15  variable g_15
+
+# --------------------------------------------
+# Ensemble loop
+# --------------------------------------------
+variable        i loop 400
+label           ensembleloop
+
+# --- VACF computes (unique IDs per selection) ---
+compute         c_w5     water_5     vacf
+compute         c_g5     graph_5     vacf
+
+compute         c_w7     water_7     vacf
+compute         c_g7     graph_7     vacf
+
+compute         c_w9     water_9     vacf
+compute         c_g9     graph_9     vacf
+
+compute         c_w12    water_12    vacf
+compute         c_g12    graph_12    vacf
+
+compute         c_w15    water_15    vacf
+compute         c_g15    graph_15    vacf
+
+compute         c_wbulk  wat  vacf
+compute         c_gbulk  gra  vacf
+
+# Output fixes
+fix             f_vacf_water_5     water_5     ave/time 1 1 1 c_c_w5[4]     file vacf_water_5.${i}
+fix             f_vacf_graph_5     graph_5     ave/time 1 1 1 c_c_g5[4]     file vacf_graph_5.${i}
+
+fix             f_vacf_water_7     water_7     ave/time 1 1 1 c_c_w7[4]     file vacf_water_7.${i}
+fix             f_vacf_graph_7     graph_7     ave/time 1 1 1 c_c_g7[4]     file vacf_graph_7.${i}
+
+fix             f_vacf_water_9     water_9     ave/time 1 1 1 c_c_w9[4]     file vacf_water_9.${i}
+fix             f_vacf_graph_9     graph_9     ave/time 1 1 1 c_c_g9[4]     file vacf_graph_9.${i}
+
+fix             f_vacf_water_12    water_12    ave/time 1 1 1 c_c_w12[4]    file vacf_water_12.${i}
+fix             f_vacf_graph_12    graph_12    ave/time 1 1 1 c_c_g12[4]    file vacf_graph_12.${i}
+
+fix             f_vacf_water_15    water_15    ave/time 1 1 1 c_c_w15[4]    file vacf_water_15.${i}
+fix             f_vacf_graph_15    graph_15    ave/time 1 1 1 c_c_g15[4]    file vacf_graph_15.${i}
+
+fix             f_vacf_water_bulk  water  ave/time 1 1 1 c_c_wbulk[4]  file vacf_water_bulk.${i}
+fix             f_vacf_graph_bulk  graph  ave/time 1 1 1 c_c_gbulk[4]  file vacf_graph_bulk.${i}
+
+
+thermo_style    custom step etotal evdwl ecoul elong ebond eangle ke pe temp &
+                          press vol density cpu
+run             2500
+
+# cleanup for next iteration
+unfix           f_vacf_water_5
+unfix           f_vacf_graph_5
+unfix           f_vacf_water_7
+unfix           f_vacf_graph_7
+unfix           f_vacf_water_9
+unfix           f_vacf_graph_9
+unfix           f_vacf_water_12
+unfix           f_vacf_graph_12
+unfix           f_vacf_water_15
+unfix           f_vacf_graph_15
+unfix           f_vacf_water_bulk
+unfix           f_vacf_graph_bulk
+
+uncompute       c_w5
+uncompute       c_g5
+uncompute       c_w7
+uncompute       c_g7
+uncompute       c_w9
+uncompute       c_g9
+uncompute       c_w12
+uncompute       c_g12
+uncompute       c_w15
+uncompute       c_g15
+uncompute       c_wbulk
+uncompute       c_gbulk
+
+next            i
+jump            SELF ensembleloop
