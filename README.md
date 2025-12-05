@@ -211,7 +211,14 @@ lammps/CA/
 
 ### Usage
 
-## Running LAMMPS Simulations
+```bash
+post-processing/CA/
+                  ├── fep                       # FEP-based CA calculation
+                  │   └── fep_CA.ipynb             # Loads output from FEP simulation and compute CA
+                  └── geometric                 # Trajectory-based CA calculation
+                      ├── CA_data_parser.m          # Reads dump files from lammps/CA/geometric/*-replica/, produces wet_*.mat 
+                      └── CA_trend.m                # Loads wet_*.mat, computes the mean CA ± standard error, and plots trend with error bars
+```
 
 ### A. Trajectory-based approach
 
@@ -260,15 +267,6 @@ lammps/CA/
    fep.ipynb
    ```
 
-### Files location
-```bash
-post-processing/CA/
-                  ├── fep
-                  │   └── fep_CA.ipynb             # Loads output from FEP simulation and compute CA
-                  └── geometric
-                      ├── CA_data_parser.m      # Reads dump files from lammps/CA/*-replica/, produces wet_*.mat 
-                      └── CA_trend.m            # Loads wet_*.mat, computes the mean CA ± standard error, and plots trend with error bars
-```
 > Notes for *A. Trajectory-based approach*
 > - Ensure that each simulation completes before running MATLAB scripts to guarantee all data is available for analysis.
 > - It's possible to use `lammps/TBR/add_OH.m` script to create a new graphene oxide and then run an equilibration simulation to generate your own stable graphene oxide configuration. (Paths and settings in the MATLAB code have to be adjusted).
@@ -358,11 +356,11 @@ post-processing/DP/
 
 ## Phonon Density of States (PDOS)
 
-This section explains how to obtain and compare the phonon density of states of water and graphene through a velocity-autocorrelation (VACF) analysis based on a LAMMPS simulation followed by a Python spectral post-processing.
+This section explains how to obtain and compare the phonon density of states of water and graphene through a velocity-autocorrelation (VACF) analysis based on a LAMMPS simulation followed by a Python post-processing.
 
 ### Overview
 
-A microcanonical production run records atomic velocities every femtosecond; the resulting VACF files for water and graphene are Fourier-transformed to yield their single-sided amplitude spectra, which are then averaged over 100 blocks and used to compute the spectral overlap factor.
+A microcanonical production run records atomic velocities every femtosecond; the resulting VACF files for water and graphene are averaged over 400 blocks and the result is then processed using a Discrete Cosine Transform (DCT) to yield its amplitude spectra.
 
 ### Directory Structure
 
@@ -372,7 +370,7 @@ lammps/PDOS/
         └─ Water-Graph_pdos.in*         # LAMMPS input files
 
 post-processing/PDOS/               
-                  └─ pdos.ipynb         # Computes PDOS and overlap factor
+                  └─ pdos.ipynb         # Computes PDOS and phonon overlap factor
 ```
 
 ### Prerequisites
@@ -409,8 +407,8 @@ post-processing/PDOS/
     pdos.ipynb
     ```
 
-   The notebook loads `vacf_water.{1..100}` and `vacf_graph.{1..100}`, performs an FFT, plots the averaged single-sided spectra, and prints the overlap factor $S_{graph/water}$.
+   The notebook loads `vacf_water.{1..400}` and `vacf_graph.{1..400}`, performs a DCT, plots the averaged spectra, and prints the phonon overlap factor $S_{graph/water}$.
 
 > Notes
 > - Required Python libraries: `numpy`, `pandas`, `scipy`, `matplotlib`.
-> - Ensure all 100 VACF files are present before launching the notebook; otherwise adjust the loop range inside the first cell.
+> - Ensure all 400 VACF files are present before launching the notebook.
