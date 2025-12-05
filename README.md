@@ -211,23 +211,65 @@ lammps/CA/
 
 ### Usage
 
-1. Navigate into `lammps/CA/0-replica/` and edit `Wet.in` by adjusting the `Atom Definition Section`. Then run LAMMPS simulation (replace `X` with MPI ranks):
+## Running LAMMPS Simulations
+
+### A. Trajectory-based approach
+
+1. Navigate into the directory for the first replica:
+
+   ```bash
+   cd lammps/CA/geometric/0-replica/
+   ```
+
+2. Edit `Wet.in`, modifying the **Atom Definition Section** as needed.
+
+3. Run the LAMMPS simulation (replace `X` with the number of MPI ranks):
 
    ```bash
    mpirun -np X lmp_mpi -in Wet.in
    ```
-2. Repeat for `1-replica` and `2-replica` in sequence.
-3. Post-process trajectory output files by running MATLAB scripts:
-    
-    ```bash
-    post-processing/CA/
-                     ├── fep
-                     │   └── fep.ipynb             # Loads output from FEP simulation and compute CA
-                     └── geometric
-                         ├── CA_data_parser.m      # Reads dump files from lammps/CA/*-replica/, produces wet_*.mat 
-                         └── CA_trend.m            # Loads wet_*.mat, computes the mean CA ± standard error, and plots trend with error bars
-    ```
-> Notes
+
+4. Repeat steps 1–3 for:
+
+   ```text
+   lammps/CA/geometric/1-replica/
+   lammps/CA/geometric/2-replica/
+   ```
+
+5. After all replicas have finished, post-process the trajectory files using the provided MATLAB scripts.
+
+---
+
+### B. Free Energy Perturbation (FEP)
+
+1. Navigate to the FEP directory:
+
+   ```bash
+   cd lammps/CA/fep
+   ```
+
+2. Run the LAMMPS FEP input:
+
+   ```bash
+   mpirun -np X lmp_mpi -in fep.in
+   ```
+
+3. Post-process results by opening and running the Jupyter notebook:
+
+   ```text
+   fep.ipynb
+   ```
+
+### Files location
+```bash
+post-processing/CA/
+                  ├── fep
+                  │   └── fep_CA.ipynb             # Loads output from FEP simulation and compute CA
+                  └── geometric
+                      ├── CA_data_parser.m      # Reads dump files from lammps/CA/*-replica/, produces wet_*.mat 
+                      └── CA_trend.m            # Loads wet_*.mat, computes the mean CA ± standard error, and plots trend with error bars
+```
+> Notes for *A. Trajectory-based approach*
 > - Ensure that each simulation completes before running MATLAB scripts to guarantee all data is available for analysis.
 > - It's possible to use `lammps/TBR/add_OH.m` script to create a new graphene oxide and then run an equilibration simulation to generate your own stable graphene oxide configuration. (Paths and settings in the MATLAB code have to be adjusted).
 
