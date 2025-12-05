@@ -202,6 +202,12 @@ lammps/CA/
 <a href="https://mathworks.com" target="_blank">
    <img src="https://img.shields.io/badge/MATLAB-R2024b-orange" alt="Matlab R2024b" />
 </a>
+<a href="https://jupyter.org/" target="_blank">
+  <img src="https://custom-icon-badges.demolab.com/badge/Jupyter-Notebook-F37626?logo=jupyter&logoColor=white" alt="Jupyter Notebook" />
+</a>
+<a href="https://python.org" target="_blank">
+  <img src="https://custom-icon-badges.demolab.com/badge/Python-3.11%2B-blue?logo=python&logoColor=white" alt="Python 3.11+" />
+</a>
 
 ### Usage
 
@@ -215,8 +221,11 @@ lammps/CA/
     
     ```bash
     post-processing/CA/
-                    ├── CA_data_parser.m         # Reads dump files from lammps/CA/*-replica/, produces wet_*.mat 
-                    └── CA_trend.m               # Loads wet_*.mat, computes the mean contact angle (CA) ± standard error, and plots trend with error bars
+                     ├── fep
+                     │   └── fep.ipynb             # Loads output from FEP simulation and compute CA
+                     └── geometric
+                         ├── CA_data_parser.m      # Reads dump files from lammps/CA/*-replica/, produces wet_*.mat 
+                         └── CA_trend.m            # Loads wet_*.mat, computes the mean CA ± standard error, and plots trend with error bars
     ```
 > Notes
 > - Ensure that each simulation completes before running MATLAB scripts to guarantee all data is available for analysis.
