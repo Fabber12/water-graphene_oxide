@@ -181,9 +181,9 @@ lammps/CA/
         │
         ├── geometric                         # Trajectory-based CA calculation
         │   ├── 0-replica                         # Base simulation directory
-        │   │   ├── TERSOFF_forcefield.ff         # Forcefield
-        │   │   ├── water_box.data                # Water box to merge with equilibrated graphene structure
-        │   │   └── Wet.in*                       # LAMMPS input files
+        │   │   ├── TERSOFF_forcefield.ff             # Forcefield
+        │   │   ├── water_box.data                    # Water box to merge with equilibrated graphene structure
+        │   │   └── Wet.in*                           # LAMMPS input files
         │   │
         │   ├── 1-replica                         # Simulation folder
         │   │   ├── TERSOFF_forcefield.ff             # Forcefield
@@ -216,8 +216,8 @@ post-processing/CA/
                   ├── fep                       # FEP-based CA calculation
                   │   └── fep_CA.ipynb             # Loads output from FEP simulation and compute CA
                   └── geometric                 # Trajectory-based CA calculation
-                      ├── CA_data_parser.m          # Reads dump files from lammps/CA/geometric/*-replica/, produces wet_*.mat 
-                      └── CA_trend.m                # Loads wet_*.mat, computes the mean CA ± standard error, and plots trend with error bars
+                      ├── CA_data_parser.m         # Reads dump files from lammps/CA/geometric/*-replica/, produces wet_*.mat 
+                      └── CA_trend.m               # Loads wet_*.mat, computes the mean CA ± standard error, and plots trend with error bars
 ```
 
 ### A. Trajectory-based approach
