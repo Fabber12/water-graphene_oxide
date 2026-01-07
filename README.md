@@ -41,9 +41,13 @@
 
 
 
-Data and analysis scripts associated with the publication "*Role of surface oxidation in enhancing heat transfer across graphene/water interface via Thermal Boundary Resistance modulation*", by F. Tarulli *et al.*
-Includes LAMMPS input files (some generated via Moltemplate) and post-processing scripts (Python, MATLAB).
- 
+Data and analysis scripts associated with the publication "*Role of surface oxidation in enhancing heat transfer across graphene–water interface via Thermal Boundary Resistance modulation*", by F. Tarulli *et al.*\
+Includes LAMMPS input files and post-processing scripts.
+
+## Citation
+Please cite the following work if you use these codes or the associated results:
+> **DOI:** https://doi.org/10.1016/j.icheatmasstransfer.2025.110364
+
 
 ## Contents
 - [Thermal Boundary Resistance (TBR)](#thermal-boundary-resistance-tbr)
@@ -163,37 +167,30 @@ The following outputs are used in the evaluation of TBR:
 
 ## Contact Angle (CA)
 
-This section describes the workflow to compute the water–graphene contact angle.
-Two procedures are available: trajectory-based contact angle caluculation (LAMMPS + MATLAB post-processing) and through free energy perturbation *FEP* (LAMMPS + python post-processing).
+This section describes the workflow to compute the water–graphene contact angle via LAMMPS simulations and MATLAB post-processing.
 
 ### Overview
 
-The trajectory-based approach is contained in the `geometric` directory. It includes three replica simulations (0-replica, 1-replica, 2-replica) performed to improve statistical reliability. Each replica starts from the final structure of the previous one and produces the corresponding trajectory files.
-
-The free energy perturbation approach is contained in the `fep` directory.
+A series of three replica simulations (`0-replica`, `1-replica`, `2-replica`) are performed to improve statistical reliability. Each replica starts from the final structure of the previous run and provides the trajectory files.
 
 ### Directory Structure
+
 ```bash
-lammps/CA/       
-        ├── fep                               # FEP-based CA calculation
-        │   ├── TERSOFF_forcefield.ff             # Forcefield
-        │   └── Wet.in*                           # LAMMPS input files
+lammps/CA/
+        ├── relaxed_graph/              # Pre-equilibrated graphene structures at various oxidation degrees
         │
-        ├── geometric                         # Trajectory-based CA calculation
-        │   ├── 0-replica                         # Base simulation directory
-        │   │   ├── TERSOFF_forcefield.ff             # Forcefield
-        │   │   ├── water_box.data                    # Water box to merge with equilibrated graphene structure
-        │   │   └── Wet.in*                           # LAMMPS input files
-        │   │
-        │   ├── 1-replica                         # Simulation folder
-        │   │   ├── TERSOFF_forcefield.ff             # Forcefield
-        │   │   └── Wet.in*                           # LAMMPS input files
-        │   │
-        │   └── 2-replica                         # Simulation folder
-        │       ├── TERSOFF_forcefield.ff             # Forcefield
-        │       └── Wet.in*                           # LAMMPS input files
+        ├── 0-replica/                  # Base simulation folder
+        │   ├── TERSOFF_forcefield.ff       # Forcefield
+        │   ├── Wet.in*                     # LAMMPS input files
+        │   └── water_box.data              # Water box to merge with equilibrated graphene structure
         │
-        └── relaxed_graph                     # Pre-equilibrated graphene structures at various oxidation degrees
+        ├── 1-replica/                  # Simulation folder
+        │   ├── TERSOFF_forcefield.ff       # Forcefield
+        │   └── Wet.in*                     # LAMMPS input files
+        │
+        └── 2-replica/                  # Simulation folder
+            ├── TERSOFF_forcefield.ff       # Forcefield
+            └── Wet.in*                     # LAMMPS input files
 ```
 ### Prerequisites 
 <a href="https://www.lammps.org" target="_blank">
@@ -202,72 +199,23 @@ lammps/CA/
 <a href="https://mathworks.com" target="_blank">
    <img src="https://img.shields.io/badge/MATLAB-R2024b-orange" alt="Matlab R2024b" />
 </a>
-<a href="https://jupyter.org/" target="_blank">
-  <img src="https://custom-icon-badges.demolab.com/badge/Jupyter-Notebook-F37626?logo=jupyter&logoColor=white" alt="Jupyter Notebook" />
-</a>
-<a href="https://python.org" target="_blank">
-  <img src="https://custom-icon-badges.demolab.com/badge/Python-3.11%2B-blue?logo=python&logoColor=white" alt="Python 3.11+" />
-</a>
 
 ### Usage
 
-```bash
-post-processing/CA/
-                  ├── fep                       # FEP-based CA calculation
-                  │   └── fep_CA.ipynb             # Loads output from FEP simulation and compute CA
-                  └── geometric                 # Trajectory-based CA calculation
-                      ├── CA_data_parser.m         # Reads dump files from lammps/CA/geometric/*-replica/, produces wet_*.mat 
-                      └── CA_trend.m               # Loads wet_*.mat, computes the mean CA ± standard error, and plots trend with error bars
-```
-
-### A. Trajectory-based approach
-
-1. Navigate into the directory for the first replica:
-
-   ```bash
-   cd lammps/CA/geometric/0-replica/
-   ```
-
-2. Edit `Wet.in`, modifying the **Atom Definition Section** as needed.
-
-3. Run the LAMMPS simulation (replace `X` with the number of MPI ranks):
+1. Navigate into `lammps/CA/0-replica/` and edit `Wet.in` by adjusting the `Atom Definition Section`. Then run LAMMPS simulation (replace `X` with MPI ranks):
 
    ```bash
    mpirun -np X lmp_mpi -in Wet.in
    ```
-
-4. Repeat steps 1–3 for:
-
-   ```text
-   lammps/CA/geometric/1-replica/
-   lammps/CA/geometric/2-replica/
-   ```
-
-5. After all replicas have finished, post-process the trajectory files using the provided MATLAB scripts.
-
----
-
-### B. Free Energy Perturbation (FEP)
-
-1. Navigate to the FEP directory:
-
-   ```bash
-   cd lammps/CA/fep
-   ```
-
-2. Run the LAMMPS FEP input:
-
-   ```bash
-   mpirun -np X lmp_mpi -in fep.in
-   ```
-
-3. Post-process results by opening and running the Jupyter notebook:
-
-   ```text
-   fep.ipynb
-   ```
-
-> Notes for *A. Trajectory-based approach*
+2. Repeat for `1-replica` and `2-replica` in sequence.
+3. Post-process trajectory output files by running MATLAB scripts:
+    
+    ```bash
+    post-processing/CA/
+                    ├── CA_data_parser.m         # Reads dump files from lammps/CA/*-replica/, produces wet_*.mat 
+                    └── CA_trend.m               # Loads wet_*.mat, computes the mean contact angle (CA) ± standard error, and plots trend with error bars
+    ```
+> Notes
 > - Ensure that each simulation completes before running MATLAB scripts to guarantee all data is available for analysis.
 > - It's possible to use `lammps/TBR/add_OH.m` script to create a new graphene oxide and then run an equilibration simulation to generate your own stable graphene oxide configuration. (Paths and settings in the MATLAB code have to be adjusted).
 
@@ -356,11 +304,11 @@ post-processing/DP/
 
 ## Phonon Density of States (PDOS)
 
-This section explains how to obtain and compare the phonon density of states of water and graphene through a velocity-autocorrelation (VACF) analysis based on a LAMMPS simulation followed by a Python post-processing.
+This section explains how to obtain and compare the phonon density of states of water and graphene through a velocity-autocorrelation (VACF) analysis based on a LAMMPS simulation followed by a Python spectral post-processing.
 
 ### Overview
 
-A microcanonical production run records atomic velocities every femtosecond; the resulting VACF files for water and graphene are averaged over 400 blocks and the result is then processed using a Discrete Cosine Transform (DCT) to yield its amplitude spectra.
+A microcanonical production run records atomic velocities every femtosecond; the resulting VACF files for water and graphene are Fourier-transformed to yield their single-sided amplitude spectra, which are then averaged over 100 blocks and used to compute the spectral overlap factor.
 
 ### Directory Structure
 
@@ -370,7 +318,7 @@ lammps/PDOS/
         └─ Water-Graph_pdos.in*         # LAMMPS input files
 
 post-processing/PDOS/               
-                  └─ pdos.ipynb         # Computes PDOS and phonon overlap factor
+                  └─ pdos.ipynb         # Computes PDOS and overlap factor
 ```
 
 ### Prerequisites
@@ -407,8 +355,15 @@ post-processing/PDOS/
     pdos.ipynb
     ```
 
-   The notebook loads `vacf_water.{1..400}` and `vacf_graph.{1..400}`, performs a DCT, plots the averaged spectra, and prints the phonon overlap factor $S_{graph/water}$.
+   The notebook loads `vacf_water.{1..100}` and `vacf_graph.{1..100}`, performs an FFT, plots the averaged single-sided spectra, and prints the overlap factor $S_{graph/water}$.
 
 > Notes
 > - Required Python libraries: `numpy`, `pandas`, `scipy`, `matplotlib`.
-> - Ensure all 400 VACF files are present before launching the notebook.
+> - Ensure all 100 VACF files are present before launching the notebook; otherwise adjust the loop range inside the first cell.
+
+<br>
+
+## Acknowledgements
+This work was partially funded by the European Union Horizon Europe Research and Innovation Programme under grant agreement number 101138397 ("M2DESCO").
+
+<p align="center"><img src="https://imnr.ro/wp/wp-content/uploads/LogoM2DESCO_96dpi.jpg" alt="M2DESCO Logo" height="35"> <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/European_Commission.svg/1200px-European_Commission.svg.png" height="50">
