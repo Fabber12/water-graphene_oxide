@@ -4,7 +4,7 @@ dump_modify 1 element O H C C O H
 
 timestep        1.
 
-velocity        all create 300 391624 dist gaussian
+velocity        all create ${temp} 391624 dist gaussian
 
 fix             mom all momentum 100 linear 1 1 1
 fix             1 all nve
@@ -70,8 +70,8 @@ compute         c_g12    graph_12    vacf
 compute         c_w15    water_15    vacf
 compute         c_g15    graph_15    vacf
 
-compute         c_wbulk  wat  vacf
-compute         c_gbulk  gra  vacf
+compute         c_wbulk  water  vacf
+compute         c_gbulk  graph  vacf
 
 # Output fixes
 fix             f_vacf_water_5     water_5     ave/time 1 1 1 c_c_w5[4]     file vacf_water_5.${i}
